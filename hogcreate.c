@@ -6,7 +6,8 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<dirent.h>
-
+#include<string.h>
+#include<stdlib.h>
 
 void main(int argc, char *argv[]){
   FILE * hogfile, * readfile;
