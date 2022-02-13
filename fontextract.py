@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# Written 2022 by Josh Cogliati
+# This program is licensed under the terms of the GPL, version 2 or later
 
-#See similar/2d/font.cpp and grs_font_read
+#See similar/2d/font.cpp and grs_font_read for format info
 
 #Starts after "PSFN" and 4 byte int.
 

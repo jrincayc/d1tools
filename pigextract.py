@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Written 2022 by Josh Cogliati
+# This program is licensed under the terms of the GPL, version 2 or later
 
 #piggy.cpp is very useful for understanding pig files.
 
