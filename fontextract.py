@@ -8,11 +8,37 @@
 
 import sys,os
 import struct
+import PIL
+import PIL.Image
 
 def read_unpack(format, file):
     size =struct.calcsize(format)
     data = file.read(size)
     return struct.unpack(format, data)
+
+def write_1_bit_font(data, width, height, filename):
+    img = PIL.Image.new("1", (width,height))
+    for h in range(height):
+        l = data[h]
+        for w in range(width):
+            bit = (l&0x80)>>7
+            if bit == 1:
+                print("\u2588",end="")
+            else:
+                print(" ",end="")
+            img.putpixel((w,h),bit)
+            l = l << 1
+        print()
+    img.save(filename)
+
+def write_color_font(data, width, height, filename):
+    img = PIL.Image.new("L", (width, height))
+    i = 0
+    for h in range(height):
+        for w in range(width):
+            img.putpixel((w,h), data[i])
+            i += 1
+    img.save(filename)
 
 if len(sys.argv) < 2:
     print(sys.argv[0], " fontfile")
@@ -47,9 +73,24 @@ kerndata_offset -= GRS_FONT_SIZE
 print("unknown1", unknown1, "unknown2", unknown2, "do", data_offset, "wo", widths_offset, "ko", kerndata_offset)
 
 width_sum = 0
+width_array = []
 for i in range(minchar, maxchar+1):
     cwidth = read_unpack("<H", f)[0]
+    width_array.append(cwidth)
     width_sum += cwidth
     print('"'+chr(i)+'"', cwidth, end=",")
 
 print("width_sum", width_sum)
+
+if FT_COLOR & flags == 0:
+    for i in range(minchar, maxchar+1):
+        cwidth = width_array[i - minchar]
+        data = f.read(height)
+        print(repr(data))
+        write_1_bit_font(data, cwidth, height, str(i)+".png")
+else:
+    for i in range(minchar, maxchar+1):
+        cwidth = width_array[i - minchar]
+        data = f.read(height*cwidth)
+        write_color_font(data, cwidth, height, str(i)+".png")
+
