@@ -94,3 +94,12 @@ else:
         data = f.read(height*cwidth)
         write_color_font(data, cwidth, height, str(i)+".png")
 
+
+print("Kern data")
+kern_first = f.read(1)
+while kern_first != b'\xff':
+    kern_second = f.read(1)
+    kern_width = f.read(1)
+    print(chr(ord(kern_first)+minchar), chr(ord(kern_second)+minchar), ord(kern_width))
+    kern_first = f.read(1)
+print(kern_first)
