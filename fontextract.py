@@ -95,11 +95,13 @@ else:
         write_color_font(data, cwidth, height, str(i)+".png")
 
 
-print("Kern data")
+#print("Kern data")
+kerning_file = open("kerning_info.txt","w")
 kern_first = f.read(1)
 while kern_first != b'\xff':
-    kern_second = f.read(1)
-    kern_width = f.read(1)
-    print(chr(ord(kern_first)+minchar), chr(ord(kern_second)+minchar), ord(kern_width))
+    kern_first = ord(kern_first)+minchar
+    kern_second = ord(f.read(1))+minchar
+    kern_width = ord(f.read(1))
+    print(kern_first, kern_second, kern_width, "#"+repr(chr(kern_first))+" "+repr(chr(kern_second)),file=kerning_file)
     kern_first = f.read(1)
-print(kern_first)
+#print(kern_first)

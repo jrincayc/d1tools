@@ -15,7 +15,7 @@ def write_pack(format, file, data):
     file.write(pack)
 
 if len(sys.argv) < 2:
-    print(sys.argv[0]," fontfile")
+    print(sys.argv[0]," fontfile [kerning_info baseline]")
     print("creates fontfile from png files in current directory")
     sys.exit(-1)
 
@@ -78,14 +78,22 @@ if mode not in ["1", "L", "P"]:
 
 f = open(sys.argv[1], "wb")
 
+kerning_info = []
+if len(sys.argv) > 2:
+    kerning_filename = sys.argv[2]
+    kerning_file = open(kerning_filename, "r")
+    for line in kerning_file.readlines():
+        line = line.strip().split("#")[0] #Strip comments starting with #
+        kerning_info.append([int(s) for s in line.split()])
+
 char_num = maxchar - minchar + 1
 f.write(b"PSFN")
 GRS_FONT_SIZE = 28
 if mode == "1":
-    # 28 bytes header, char_num*font_height image data, char_num*2 width info, 1 byte to say no kerning info
-    length = GRS_FONT_SIZE + char_num*(font_height + 2) + 1
+    # 28 bytes header, char_num*font_height image data, char_num*2 width info, 1 byte to end kerning info plus 3 bytes per item of kerning_info
+    length = GRS_FONT_SIZE + char_num*(font_height + 2) + 1 + 3*len(kerning_info)
 else:
-    length = GRS_FONT_SIZE + font_height*width_sum + char_num*2 + 1
+    length = GRS_FONT_SIZE + font_height*width_sum + char_num*2 + 1 + 3*len(kerning_info)
 
 write_pack("<I", f, (length,))
 
@@ -93,14 +101,18 @@ FT_COLOR = 1
 FT_PROPORTIONAL = 2
 FT_KERNED = 4
 
+if len(sys.argv) > 3:
+    baseline = int(sys.argv[3])
+else:
+    baseline = font_height
 
 write_pack("<HHHHBB", f, (maxwidth, font_height,
                           FT_PROPORTIONAL | FT_KERNED | (mode != "1"),
-                          font_height, #XXX fix baseline
+                          baseline,
                           minchar, maxchar))
 
 write_pack("<HIIII", f, (0, GRS_FONT_SIZE + char_num*2, 0,
-                         GRS_FONT_SIZE, length - 1))
+                         GRS_FONT_SIZE, length - 1 - 3*len(kerning_info)))
 
 for i in range(minchar, maxchar +1):
     cwidth = font_images[i].size[0]
@@ -125,4 +137,11 @@ for i in range(minchar, maxchar + 1):
             for w in range(cwidth):
                 write_pack("B", f, (img.getpixel((w,h)),))
 
+
+
+
+for kern_info in kerning_info:
+    first, second, kwidth = kern_info
+    write_pack("BBB", f, (first - minchar, second - minchar, kwidth))
+    print(first,second,kwidth, end=" ")
 f.write(b"\xff") #XXX write actual kerning info
