@@ -22,3 +22,12 @@ new_hog/font1-1.fnt : x11_pd_fonts/10x20.png fontgen.py
 
 new_hog/font3-1.fnt : x11_pd_fonts/5x7.png
 	(mkdir x11_pd_fonts/5x7 && cd x11_pd_fonts/5x7 &&  ../../fontgen.py ../5x7.png 17 144 24 5 16 7  && ../../fontcreate.py ../../new_hog/font3-1.fnt )
+
+new_hog/font2-1.fnt : new_hog/font1-1.fnt
+	cp $< $@
+
+new_hog/font2-2.fnt : new_hog/font1-1.fnt
+	cp $< $@
+
+new_hog/font2-3.fnt : new_hog/font1-1.fnt
+	cp $< $@
