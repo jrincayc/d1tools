@@ -3,6 +3,7 @@
 #uses files from xfd and a screen capture
 # ../../fontgen.py ../10x20.png 15 144 25 10 29 20
 # ../../fontgen.py ../5x7.png 17 144 24 5 16 7
+# ../../fontgen.py ../7x13B.png 16 144 24 7 22 13
 
 import sys,os
 import struct

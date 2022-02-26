@@ -21,6 +21,9 @@ base_files/palette.txt : palgen.py
 #new_hog/font1-1.fnt : x11_pd_fonts/10x20.png fontgen.py
 #	(mkdir x11_pd_fonts/10x20 && cd x11_pd_fonts/10x20 &&  ../../fontgen.py ../10x20.png 15 144 25 10 29 20 && ../../fontcreate.py ../../new_hog/font1-1.fnt )
 
+new_hog/font1-1.fnt : x11_pd_fonts/7x13B.png fontgen.py
+	(mkdir x11_pd_fonts/7x13B && cd x11_pd_fonts/7x13B && ../../fontgen.py ../7x13B.png 16 144 24 7 22 13 && ../../fontcreate.py ../../new_hog/font1-1.fnt )
+
 new_hog/font3-1.fnt : x11_pd_fonts/5x7.png
 	(mkdir x11_pd_fonts/5x7 && cd x11_pd_fonts/5x7 &&  ../../fontgen.py ../5x7.png 17 144 24 5 16 7  && ../../fontcreate.py ../../new_hog/font3-1.fnt )
 
@@ -31,9 +34,6 @@ new_hog/font2-2.fnt : new_hog/font1-1.fnt
 	cp $< $@
 
 new_hog/font2-3.fnt : new_hog/font1-1.fnt
-	cp $< $@
-
-new_hog/font1-1.fnt : new_hog/font3-1.fnt
 	cp $< $@
 
 descent.hog : hogcreate new_hog/font3-1.fnt new_hog/font2-1.fnt new_hog/font2-2.fnt new_hog/font2-3.fnt new_hog/font1-1.fnt new_hog/palette.256 new_hog/descent.txb
