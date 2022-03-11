@@ -17,6 +17,9 @@ if len(sys.argv) < 2:
     print("extracts pigfile into current directory")
     sys.exit(-1)
 
+DBM_FLAG_LARGE = 128 # add 256 to width
+DBM_FLAG_ABM = 64 # animated bitmap
+DBM_NUM_FRAMES = 63 # number of frames
 f = open(sys.argv[1], "rb")
 
 num_bitmaps, num_sounds = read_unpack("<II", f)
@@ -30,12 +33,15 @@ for i in range(num_bitmaps):
         name, dflags, width, height, flags, avg_color, offset = \
             read_unpack("<8sBBBBBI", f)
         print(name, dflags, width,"x",height, flags, avg_color,"offset", offset)
+        print("LARGE", dflags & DBM_FLAG_LARGE, "ANIMATED", dflags & DBM_FLAG_ABM, "NUM_FRAMES", dflags & DBM_NUM_FRAMES)
     else:
         name, dflags, width, height, wh_extra, flags, avg_color, offset = \
             read_unpack("<8sBBBBBBI", f)
         #XXX add wh_extra to width and height
         print(name, dflags, width,"x",height, wh_extra, flags, avg_color,"offset", offset)
-    str_name = name.replace(b"\x00",b"_").decode()
+    str_name = name.split(b"\x00")[0].decode()
+    if dflags & DBM_FLAG_ABM != 0:
+        str_name += "_" + str(dflags & DBM_NUM_FRAMES)
     bitmap_list.append((str_name,offset))
 
 sound_list = []
