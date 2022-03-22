@@ -33,6 +33,11 @@ print("form", form)
 
 if form in [b"PBM ", b"ILBM"]:
     #process
+    subsig, s_length = read_unpack(">4sL", f)
+    print("subsig", subsig, s_length)
+    if subsig == b"BMHD":
+        w, h, x, y, nplanes, masking, compression, unknown, transparent_color, xaspect, yaspect, pagewidth, pageheight = read_unpack(">4h4Bh2B2h", f)
+        print(w, h, x, y, nplanes, masking, compression, unknown, transparent_color, xaspect, yaspect, pagewidth, pageheight)
     pass
 elif form == b"ANIM":
     #process

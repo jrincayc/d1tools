@@ -32,6 +32,11 @@ f = open(sys.argv[1], "rb")
 
 num_bitmaps, num_sounds = read_unpack("<II", f)
 
+if num_bitmaps > 0xfff: #Probably the offset to the real data
+    junk = f.read(num_bitmaps - 8)
+    print("skipping", num_bitmaps)
+    num_bitmaps, num_sounds = read_unpack("<II", f)
+
 d1kind = True
 print("bitmaps", num_bitmaps, "sounds", num_sounds)
 
