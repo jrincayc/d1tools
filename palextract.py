@@ -6,11 +6,7 @@
 
 import sys,os
 import struct
-
-def read_unpack(format, file):
-    size =struct.calcsize(format)
-    data = file.read(size)
-    return struct.unpack(format, data)
+from utils import read_unpack
 
 if len(sys.argv) < 2:
     print(sys.argv[0], " palette.256 palette.txt")

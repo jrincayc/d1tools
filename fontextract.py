@@ -10,11 +10,7 @@ import sys,os
 import struct
 import PIL
 import PIL.Image
-
-def read_unpack(format, file):
-    size =struct.calcsize(format)
-    data = file.read(size)
-    return struct.unpack(format, data)
+from utils import read_unpack
 
 def write_1_bit_font(data, width, height, filename):
     img = PIL.Image.new("1", (width,height))
