@@ -29,6 +29,7 @@ def read_vecs(num, file):
 while True:
     try:
         kind, length = read_unpack("<4sI", f)
+        print("kind", kind, length)
     except struct.error:
         break
     if kind == b'TXTR':
@@ -41,6 +42,23 @@ while True:
         pmmin = read_vecs(1, f)
         pmmax = read_vecs(1, f)
         print("object header", n_models, rad, pmmin, pmmax)
+    elif kind == b'SOBJ':
+        n, submodule_parents = read_unpack("<HH", f)
+        norms = read_vecs(1, f)
+        pnts = read_vecs(1, f)
+        offsets = read_vecs(1, f)
+        rads, ptrs = read_unpack("<II", f)
+        print(n, submodule_parents, norms, pnts, offsets, rads, ptrs)
+    elif kind == b'GUNS':
+        n_guns = read_unpack("<I", f)[0]
+        print('n_guns', n_guns)
+        for ni in range(n_guns):
+            gun_id, submodel = read_unpack("<HH", f)
+            gun_points = read_vecs(1, f)
+            print(ni, gun_id, submodel, gun_points)
+            if version >= 7:
+                gun_dir = read_vecs(1, f)
+                print(gun_dir)
     else:
         data = f.read(length)
         print(kind, length, data[:60])
