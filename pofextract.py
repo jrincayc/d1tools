@@ -3,10 +3,66 @@
 # This program is licensed under the terms of the GPL, version 2 or later
 
 #polyobj read_model_file is very useful for understanding pof files.
+#similar/3d/interp.cpp is also useful
 
-import sys,os
+import sys,os, enum
 import struct
 from utils import read_unpack
+
+class Op(enum.Enum):
+    EOF = 0
+    DEFPOINTS = 1
+    FLATPOLY = 2
+    TMAPPOLY = 3
+    SORTNORM = 4
+    RODBM = 5
+    SUBCALL = 6
+    DEFP_START = 7
+    GLOW = 8
+
+
+def interp_IDTA(data):
+    def get_short(data, index):
+        return struct.unpack('<H', data[index:index+2])[0]
+    data_index = 0
+    op = get_short(data, data_index)
+    while data_index < len(data): #op != Op.EOF:
+        op_num = get_short(data, data_index)
+        op = Op(op_num)
+        print(op)
+        if op == Op.DEFPOINTS:
+            n = get_short(data, data_index + 2)
+            record_size = n * (3*4) + 4 + 4
+            print(n, record_size)
+        elif op == Op.DEFP_START:
+            n = get_short(data, data_index + 2)
+            record_size = n * (3*4) + 4 + 4
+            print(n, record_size)
+        elif op == Op.FLATPOLY:
+            n = get_short(data, data_index + 2)
+            record_size = 30 + ((n & ~1) + 1) * 2
+            print(n, record_size)
+        elif op == Op.TMAPPOLY:
+            n = struct.unpack('<H', data[data_index+2:data_index+4])[0]
+            record_size = 30 + ((n & ~1) + 1) * 2 + n * 12
+            print(n, record_size)
+        elif op == Op.SORTNORM:
+            record_size = 32
+        elif op == Op.RODBM:
+            record_size = 36
+        elif op == Op.SUBCALL:
+            record_size = 20
+        elif op == Op.GLOW:
+            record_size = 4
+        elif op == Op.EOF:
+            record_size = 2
+        else:
+            record_size = 2
+            print("Unknown Op", op_num)
+        print(data[data_index:data_index + record_size][:18])
+        data_index += record_size
+        #print(data[data_index-4:data_index + 40])
+    pass
 
 if len(sys.argv) < 2:
     print(sys.argv[0]," file.pof")
@@ -65,6 +121,10 @@ while True:
             for frame in range(0, n_frames):
                 angles = read_unpack("<HHH", f)
                 print("angles", model, frame, angles)
+    elif kind == b'IDTA':
+        data = f.read(length)
+        print(kind, length, data[:60])
+        interp_IDTA(data)
     else:
         data = f.read(length)
         print(kind, length, data[:60])
