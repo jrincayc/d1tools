@@ -59,6 +59,12 @@ while True:
             if version >= 7:
                 gun_dir = read_vecs(1, f)
                 print(gun_dir)
+    elif kind == b'ANIM':
+        n_frames = read_unpack("<H",f)[0]
+        for model in range(0, n_models):
+            for frame in range(0, n_frames):
+                angles = read_unpack("<HHH", f)
+                print("angles", model, frame, angles)
     else:
         data = f.read(length)
         print(kind, length, data[:60])
