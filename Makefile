@@ -38,3 +38,6 @@ new_hog/font2-3.fnt : new_hog/font1-1.fnt
 
 descent.hog : hogcreate new_hog/font3-1.fnt new_hog/font2-1.fnt new_hog/font2-2.fnt new_hog/font2-3.fnt new_hog/font1-1.fnt new_hog/palette.256 new_hog/descent.txb
 	(cd new_hog && ../hogcreate ../descent.hog)
+
+descent.pig : pigcreate.py
+	(cd new_pig && ../pigcreate.py ../descent.pig)
