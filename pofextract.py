@@ -24,6 +24,10 @@ class Op(enum.Enum):
 def interp_IDTA(data):
     def get_short(data, index):
         return struct.unpack('<H', data[index:index+2])[0]
+    def get_int(data, index):
+        return struct.unpack('<I', data[index:index+4])[0]
+    def get_vec(data, index):
+        return struct.unpack('<3I', data[index:index+12])
     data_index = 0
     op = get_short(data, data_index)
     while data_index < len(data): #op != Op.EOF:
@@ -46,6 +50,16 @@ def interp_IDTA(data):
             n = struct.unpack('<H', data[data_index+2:data_index+4])[0]
             record_size = 30 + ((n & ~1) + 1) * 2 + n * 12
             print(n, record_size)
+            print(get_vec(data, data_index + 4), get_vec(data, data_index + 16))
+            print(get_short(data, data_index + 28))
+            tmap_shorts = []
+            for i in range(n):
+                tmap_shorts.append(get_short(data, data_index + 30 + i * 2))
+            print(tmap_shorts)
+            tmap_ints = []
+            for i in range(n):
+                tmap_ints.append((get_int(data, data_index + 30+((n&~1)+1)*2+ i * 8),get_int(data, data_index + 30+((n&~1)+1)*2+ i * 8 + 4)))
+            print(tmap_ints)
         elif op == Op.SORTNORM:
             record_size = 32
         elif op == Op.RODBM:
@@ -54,6 +68,8 @@ def interp_IDTA(data):
             record_size = 20
         elif op == Op.GLOW:
             record_size = 4
+            glow_num = get_short(data, data_index + 2)
+            print(glow_num, record_size)
         elif op == Op.EOF:
             record_size = 2
         else:
