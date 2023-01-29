@@ -4,6 +4,8 @@
 
 #polyobj read_model_file is very useful for understanding pof files.
 #similar/3d/interp.cpp is also useful
+#common/include/maths.h
+#common/include/vecmat.h
 
 import sys,os, enum
 import struct
@@ -20,14 +22,18 @@ class Op(enum.Enum):
     DEFP_START = 7
     GLOW = 8
 
+def float_vec(v):
+    return [x/2**16 for x in v]
 
 def interp_IDTA(data):
     def get_short(data, index):
         return struct.unpack('<H', data[index:index+2])[0]
-    def get_int(data, index):
+    def get_uint(data, index):
         return struct.unpack('<I', data[index:index+4])[0]
+    def get_int(data, index):
+        return struct.unpack('<i', data[index:index+4])[0]
     def get_vec(data, index):
-        return struct.unpack('<3I', data[index:index+12])
+        return struct.unpack('<3i', data[index:index+12])
     data_index = 0
     op = get_short(data, data_index)
     while data_index < len(data): #op != Op.EOF:
@@ -38,14 +44,28 @@ def interp_IDTA(data):
             n = get_short(data, data_index + 2)
             record_size = n * (3*4) + 4 + 4
             print(n, record_size)
+            def_points = []
+            for i in range(n):
+                def_points.append(get_vec(data, data_index + 4 + i*12))
+            print(def_points)
         elif op == Op.DEFP_START:
             n = get_short(data, data_index + 2)
             record_size = n * (3*4) + 4 + 4
             print(n, record_size)
+            def_points = []
+            for i in range(n):
+                def_points.append(get_vec(data, data_index + 4 + i*12))
+            print(def_points)
         elif op == Op.FLATPOLY:
             n = get_short(data, data_index + 2)
             record_size = 30 + ((n & ~1) + 1) * 2
             print(n, record_size)
+            print(get_vec(data, data_index + 4), get_vec(data, data_index + 16))
+            print(get_short(data, data_index + 28))
+            flat_shorts = []
+            for i in range(n):
+                flat_shorts.append(get_short(data, data_index + 30 + i * 2))
+            print(flat_shorts)
         elif op == Op.TMAPPOLY:
             n = struct.unpack('<H', data[data_index+2:data_index+4])[0]
             record_size = 30 + ((n & ~1) + 1) * 2 + n * 12
@@ -95,7 +115,7 @@ if head != b"PSPO":
 def read_vecs(num, file):
     vecs = []
     for i in range(num):
-        vecs.append(read_unpack("<3I", file))
+        vecs.append(read_unpack("<3i", file))
     return vecs
 
 while True:
