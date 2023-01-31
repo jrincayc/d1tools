@@ -82,10 +82,18 @@ def interp_IDTA(data):
             print(tmap_ints)
         elif op == Op.SORTNORM:
             record_size = 32
+            print(get_vec(data, data_index + 4),get_vec(data, data_index + 16))
+            print(get_short(data, data_index + 28), get_short(data, data_index + 30))
         elif op == Op.RODBM:
             record_size = 36
+            print(get_vec(data, data_index + 4),get_vec(data, data_index + 20))
+            print(get_short(data, data_index + 2))
+            print(get_int(data, data_index + 16),get_int(data, data_index + 32))
         elif op == Op.SUBCALL:
             record_size = 20
+            print(get_short(data, data_index + 2))
+            print(get_vec(data, data_index + 4))
+            print(get_short(data, data_index + 16))
         elif op == Op.GLOW:
             record_size = 4
             glow_num = get_short(data, data_index + 2)
