@@ -9,7 +9,9 @@
 
 import sys,os, enum
 import struct
+import xml.etree.ElementTree as ET
 from utils import read_unpack
+
 
 class Op(enum.Enum):
     EOF = 0
@@ -109,16 +111,24 @@ def interp_IDTA(data):
     pass
 
 if len(sys.argv) < 2:
-    print(sys.argv[0]," file.pof")
+    print(sys.argv[0]," file.pof [dump.xml]")
     sys.exit(-1)
+
+if len(sys.argv) > 2:
+    xml_dump_filename = sys.argv[2]
+else:
+    xml_dump_filename = None
 
 f = open(sys.argv[1],"rb")
 
+root = ET.Element('pof')
 head, version = read_unpack("<4sH", f)
 print(head, version)
 if head != b"PSPO":
     print("not a pof file")
     sys.exit(-2)
+root.attrib['head'] = head.decode()
+root.attrib['version'] = str(version)
 
 def read_vecs(num, file):
     vecs = []
@@ -132,6 +142,8 @@ while True:
         print("kind", kind, length)
     except struct.error:
         break
+    obj_elem = ET.SubElement(root, 'object')
+    obj_elem.attrib['kind'] = kind.decode()
     if kind == b'TXTR':
         num_str = read_unpack("<H", f)[0]
         data = f.read(length - 2)
@@ -172,3 +184,7 @@ while True:
     else:
         data = f.read(length)
         print(kind, length, data[:60])
+
+if xml_dump_filename is not None:
+    tree = ET.ElementTree(root)
+    tree.write(open(xml_dump_filename,"wb"))
