@@ -149,11 +149,15 @@ while True:
         data = f.read(length - 2)
         textures = data.split(b'\x00')[:num_str]
         print("textures", textures)
+        for texture in textures:
+            texture_elem = ET.SubElement(obj_elem, "texture")
+            texture_elem.text = texture.decode()
     elif kind == b'OHDR':
         n_models, rad = read_unpack("<II", f)
         pmmin = read_vecs(1, f)
         pmmax = read_vecs(1, f)
         print("object header", n_models, rad, pmmin, pmmax)
+        obj_elem.attrib.update({"n_models": str(n_models), "rad": str(rad), "pmmin": str(pmmin), "pmmax": str(pmmax)})
     elif kind == b'SOBJ':
         n, submodule_parents = read_unpack("<HH", f)
         norms = read_vecs(1, f)
@@ -187,4 +191,5 @@ while True:
 
 if xml_dump_filename is not None:
     tree = ET.ElementTree(root)
+    ET.indent(tree)
     tree.write(open(xml_dump_filename,"wb"))
