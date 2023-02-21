@@ -165,22 +165,39 @@ while True:
         offsets = read_vecs(1, f)
         rads, ptrs = read_unpack("<II", f)
         print(n, submodule_parents, norms, pnts, offsets, rads, ptrs)
+        obj_elem.attrib.update({"n": str(n),"submodule_parents": str(submodule_parents), "rads": str(rads), "ptrs": str(ptrs)})
+        norms_elem = ET.SubElement(obj_elem, "norms")
+        norms_elem.text = str(norms[0])
+        pnts_elem = ET.SubElement(obj_elem, "pnts")
+        pnts_elem.text = str(pnts[0])
+        offsets_elem = ET.SubElement(obj_elem, "offsets")
+        offsets_elem.text = str(offsets[0])
     elif kind == b'GUNS':
         n_guns = read_unpack("<I", f)[0]
         print('n_guns', n_guns)
+        obj_elem.attrib['n_guns'] = str(n_guns)
         for ni in range(n_guns):
+            gun_elem = ET.SubElement(obj_elem, "gun")
             gun_id, submodel = read_unpack("<HH", f)
+            gun_elem.attrib.update({"gun_id":str(gun_id), "submodel": str(submodel)})
             gun_points = read_vecs(1, f)
+            points_elem = ET.SubElement(gun_elem, "gun_points")
+            points_elem.text = str(gun_points[0])
             print(ni, gun_id, submodel, gun_points)
             if version >= 7:
                 gun_dir = read_vecs(1, f)
                 print(gun_dir)
+                gun_dir_elem = ET.SubElement(gun_elem, "gun_dir")
+                gun_dir_elem.text = str(gun_dir[0])
     elif kind == b'ANIM':
         n_frames = read_unpack("<H",f)[0]
+        obj_elem.attrib["n_frames"] = str(n_frames)
         for model in range(0, n_models):
             for frame in range(0, n_frames):
                 angles = read_unpack("<HHH", f)
                 print("angles", model, frame, angles)
+                anim_elem = ET.SubElement(obj_elem, "angles")
+                anim_elem.attrib.update({"model": str(model), "frame": str(frame), "angles": str(angles)})
     elif kind == b'IDTA':
         data = f.read(length)
         print(kind, length, data[:60])
