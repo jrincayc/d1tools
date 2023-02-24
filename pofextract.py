@@ -27,7 +27,7 @@ class Op(enum.Enum):
 def float_vec(v):
     return [x/2**16 for x in v]
 
-def interp_IDTA(data):
+def interp_IDTA(data, obj_elem):
     def get_short(data, index):
         return struct.unpack('<H', data[index:index+2])[0]
     def get_uint(data, index):
@@ -42,31 +42,49 @@ def interp_IDTA(data):
         op_num = get_short(data, data_index)
         op = Op(op_num)
         print(op)
+        op_elem = ET.SubElement(obj_elem, str(op)[3:])
         if op == Op.DEFPOINTS:
             n = get_short(data, data_index + 2)
             record_size = n * (3*4) + 4 + 4
             print(n, record_size)
+            op_elem.attrib["n"] = str(n)
             def_points = []
             for i in range(n):
                 def_points.append(get_vec(data, data_index + 4 + i*12))
+                def_point_elem = ET.SubElement(op_elem, "point")
+                def_point_elem.text = str(def_points[-1])
             print(def_points)
         elif op == Op.DEFP_START:
             n = get_short(data, data_index + 2)
             record_size = n * (3*4) + 4 + 4
             print(n, record_size)
+            op_elem.attrib["n"] = str(n)
             def_points = []
             for i in range(n):
                 def_points.append(get_vec(data, data_index + 4 + i*12))
+                def_point_elem = ET.SubElement(op_elem, "point")
+                def_point_elem.text = str(def_points[-1])
             print(def_points)
         elif op == Op.FLATPOLY:
             n = get_short(data, data_index + 2)
             record_size = 30 + ((n & ~1) + 1) * 2
             print(n, record_size)
-            print(get_vec(data, data_index + 4), get_vec(data, data_index + 16))
-            print(get_short(data, data_index + 28))
+            op_elem.attrib["n"] = str(n)
+            vec1 = get_vec(data, data_index + 4)
+            vec2 = get_vec(data, data_index + 16)
+            vec1_elem = ET.SubElement(op_elem, "vec1")
+            vec1_elem.text = str(vec1)
+            vec2_elem = ET.SubElement(op_elem, "vec2")
+            vec2_elem.text = str(vec2)
+            print(vec1, vec2)
+            short1 = get_short(data, data_index + 28)
+            print(short1)
+            op_elem.attrib["short"] = str(short1)
             flat_shorts = []
             for i in range(n):
                 flat_shorts.append(get_short(data, data_index + 30 + i * 2))
+                f_short_elem = ET.SubElement(op_elem, "short")
+                f_short_elem.text = str(flat_shorts[-1])
             print(flat_shorts)
         elif op == Op.TMAPPOLY:
             n = struct.unpack('<H', data[data_index+2:data_index+4])[0]
@@ -201,7 +219,7 @@ while True:
     elif kind == b'IDTA':
         data = f.read(length)
         print(kind, length, data[:60])
-        interp_IDTA(data)
+        interp_IDTA(data, obj_elem)
     else:
         data = f.read(length)
         print(kind, length, data[:60])
