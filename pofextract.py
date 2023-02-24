@@ -36,6 +36,9 @@ def interp_IDTA(data, obj_elem):
         return struct.unpack('<i', data[index:index+4])[0]
     def get_vec(data, index):
         return struct.unpack('<3i', data[index:index+12])
+    def add_sub(upper, name, text_data):
+        lower = ET.SubElement(upper, name)
+        lower.text = str(text_data)
     data_index = 0
     op = get_short(data, data_index)
     while data_index < len(data): #op != Op.EOF:
@@ -51,8 +54,7 @@ def interp_IDTA(data, obj_elem):
             def_points = []
             for i in range(n):
                 def_points.append(get_vec(data, data_index + 4 + i*12))
-                def_point_elem = ET.SubElement(op_elem, "point")
-                def_point_elem.text = str(def_points[-1])
+                add_sub(op_elem, "point", def_points[-1])
             print(def_points)
         elif op == Op.DEFP_START:
             n = get_short(data, data_index + 2)
@@ -62,8 +64,7 @@ def interp_IDTA(data, obj_elem):
             def_points = []
             for i in range(n):
                 def_points.append(get_vec(data, data_index + 4 + i*12))
-                def_point_elem = ET.SubElement(op_elem, "point")
-                def_point_elem.text = str(def_points[-1])
+                add_sub(op_elem, "point", def_points[-1])
             print(def_points)
         elif op == Op.FLATPOLY:
             n = get_short(data, data_index + 2)
@@ -72,10 +73,8 @@ def interp_IDTA(data, obj_elem):
             op_elem.attrib["n"] = str(n)
             vec1 = get_vec(data, data_index + 4)
             vec2 = get_vec(data, data_index + 16)
-            vec1_elem = ET.SubElement(op_elem, "vec1")
-            vec1_elem.text = str(vec1)
-            vec2_elem = ET.SubElement(op_elem, "vec2")
-            vec2_elem.text = str(vec2)
+            add_sub(op_elem, "vec1", vec1)
+            add_sub(op_elem, "vec2", vec2)
             print(vec1, vec2)
             short1 = get_short(data, data_index + 28)
             print(short1)
@@ -83,40 +82,69 @@ def interp_IDTA(data, obj_elem):
             flat_shorts = []
             for i in range(n):
                 flat_shorts.append(get_short(data, data_index + 30 + i * 2))
-                f_short_elem = ET.SubElement(op_elem, "short")
-                f_short_elem.text = str(flat_shorts[-1])
+                add_sub(op_elem, "short", flat_shorts[-1])
             print(flat_shorts)
         elif op == Op.TMAPPOLY:
             n = struct.unpack('<H', data[data_index+2:data_index+4])[0]
             record_size = 30 + ((n & ~1) + 1) * 2 + n * 12
             print(n, record_size)
-            print(get_vec(data, data_index + 4), get_vec(data, data_index + 16))
-            print(get_short(data, data_index + 28))
+            op_elem.attrib["n"] = str(n)
+            vec1 = get_vec(data, data_index + 4)
+            vec2 = get_vec(data, data_index + 16)
+            add_sub(op_elem, "vec1", vec1)
+            add_sub(op_elem, "vec2", vec2)
+            print(vec1, vec2)
+            short1 = get_short(data, data_index + 28)
+            op_elem.attrib["short"] = str(short1)
+            print(short1)
             tmap_shorts = []
             for i in range(n):
                 tmap_shorts.append(get_short(data, data_index + 30 + i * 2))
+                add_sub(op_elem, "tmap_short", tmap_shorts[-1])
             print(tmap_shorts)
             tmap_ints = []
             for i in range(n):
                 tmap_ints.append((get_int(data, data_index + 30+((n&~1)+1)*2+ i * 8),get_int(data, data_index + 30+((n&~1)+1)*2+ i * 8 + 4)))
+                add_sub(op_elem, "tmap_int", tmap_ints[-1])
             print(tmap_ints)
         elif op == Op.SORTNORM:
             record_size = 32
-            print(get_vec(data, data_index + 4),get_vec(data, data_index + 16))
-            print(get_short(data, data_index + 28), get_short(data, data_index + 30))
+            vec1 = get_vec(data, data_index + 4)
+            vec2 = get_vec(data, data_index + 16)
+            add_sub(op_elem, "vec1", vec1)
+            add_sub(op_elem, "vec2", vec2)
+            print(vec1, vec2)
+            short1 = get_short(data, data_index + 28)
+            short2 = get_short(data, data_index + 30)
+            print(short1, short2)
+            op_elem.attrib.update({"short1":str(short1),"short2":str(short2)})
         elif op == Op.RODBM:
             record_size = 36
-            print(get_vec(data, data_index + 4),get_vec(data, data_index + 20))
-            print(get_short(data, data_index + 2))
-            print(get_int(data, data_index + 16),get_int(data, data_index + 32))
+            vec1 = get_vec(data, data_index + 4)
+            vec2 = get_vec(data, data_index + 20)
+            print(vec1, vec2)
+            add_sub(op_elem, "vec1", vec1)
+            add_sub(op_elem, "vec2", vec2)
+            short1 = get_short(data, data_index + 2)
+            print(short1)
+            int1 = get_int(data, data_index + 16)
+            int2 = get_int(data, data_index + 32)
+            print(int1, int2)
+            op_elem.attrib.update({"short1":str(short1),"int1":str(int1),"int2":str(int2)})
         elif op == Op.SUBCALL:
             record_size = 20
-            print(get_short(data, data_index + 2))
-            print(get_vec(data, data_index + 4))
-            print(get_short(data, data_index + 16))
+            short1 = get_short(data, data_index + 2)
+            print(short1)
+            vec1 = get_vec(data, data_index + 4)
+            print(vec1)
+            add_sub(op_elem, "vec1", vec1)
+            short2 = get_short(data, data_index + 16)
+            print(short2)
+            op_elem.attrib.update({"short1":str(short1),"short2":str(short2)})
         elif op == Op.GLOW:
             record_size = 4
             glow_num = get_short(data, data_index + 2)
+            op_elem.attrib["glow_num"] = str(glow_num)
             print(glow_num, record_size)
         elif op == Op.EOF:
             record_size = 2
